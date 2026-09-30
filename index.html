@@ -54,11 +54,13 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased relative overflow-x-hidden">
 
-    <header class="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/80 shadow-xs">
+    <!-- Header & Tab Combined Container (sticky top-0 z-50) -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                    <i class="fa-solid fa-glasses text-lg"></i>
+                <!-- 威嚇レッサーパンダ画像アイコン -->
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200/80 shadow-sm">
+                    <img src="ressapanda-ikaku.png" alt="レッサーパンダ" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h1 class="font-extrabold text-base sm:text-lg text-slate-900 leading-tight">
@@ -79,24 +81,25 @@
                 </span>
             </div>
         </div>
-    </header>
 
-    <div class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-16 z-40 shadow-xs">
-        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-around sm:justify-start space-x-1 sm:space-x-4 text-sm font-bold overflow-x-auto">
-            <button onclick="switchTab('zoo')" id="tab-zoo" class="py-3.5 px-5 flex items-center space-x-2 text-emerald-800 tab-active-zoo transition shrink-0 rounded-t-2xl">
-                <i class="fa-solid fa-paw text-lg"></i>
-                <span>西山動物園</span>
-            </button>
-            <button onclick="switchTab('station')" id="tab-station" class="py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl">
-                <i class="fa-solid fa-store text-lg"></i>
-                <span>道の駅 西山公園</span>
-            </button>
-            <button onclick="switchTab('calendar')" id="tab-calendar" class="py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl">
-                <i class="fa-solid fa-calendar-days text-lg"></i>
-                <span>カレンダー混雑予測</span>
-            </button>
+        <!-- Navigation Tabs -->
+        <div class="border-t border-slate-200/60 bg-slate-50/50">
+            <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-around sm:justify-start space-x-1 sm:space-x-4 text-sm font-bold overflow-x-auto">
+                <button type="button" onclick="switchTab('zoo')" id="tab-zoo" class="relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-emerald-800 tab-active-zoo transition shrink-0 rounded-t-2xl font-bold">
+                    <i class="fa-solid fa-paw text-lg pointer-events-none"></i>
+                    <span class="pointer-events-none">西山動物園</span>
+                </button>
+                <button type="button" onclick="switchTab('station')" id="tab-station" class="relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl font-bold">
+                    <i class="fa-solid fa-store text-lg pointer-events-none"></i>
+                    <span class="pointer-events-none">道の駅 西山公園</span>
+                </button>
+                <button type="button" onclick="switchTab('calendar')" id="tab-calendar" class="relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl font-bold">
+                    <i class="fa-solid fa-calendar-days text-lg pointer-events-none"></i>
+                    <span class="pointer-events-none">カレンダー混雑予測</span>
+                </button>
+            </div>
         </div>
-    </div>
+    </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-20">
 
@@ -286,11 +289,11 @@
                 </div>
 
                 <div class="flex items-center space-x-3 bg-white/80 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-                    <button onclick="changeCalendarMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs">
+                    <button type="button" onclick="changeCalendarMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs cursor-pointer">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
                     <span id="calendar-month-label" class="text-base font-black text-slate-800 min-w-[120px] text-center">2026年 9月</span>
-                    <button onclick="changeCalendarMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs">
+                    <button type="button" onclick="changeCalendarMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs cursor-pointer">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
@@ -324,7 +327,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 pb-3 gap-2">
                     <div>
                         <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">選択した日付の予測詳細</span>
-                        <h3 id="detail-date-title" class="text-lg font-black text-slate-800">2026年9月26日(土)</h3>
+                        <h3 id="detail-date-title" class="text-lg font-black text-slate-800">2026年9月30日(水)</h3>
                     </div>
                     <div id="detail-event-tag" class="hidden text-xs font-bold px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-800 self-start sm:self-center">
                         <i class="fa-solid fa-star mr-1"></i>つつじまつり
@@ -332,10 +335,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 動物園 -->
                     <div class="p-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/50 flex flex-col justify-between">
                         <div class="flex justify-between items-center">
                             <span class="font-extrabold text-slate-800 text-sm flex items-center">
-                                <i class="fa-solid fa-paw text-emerald-600 mr-2"></i>西山動物園
+                                <i class="fa-solid fa-paw text-emerald-600 mr-2"></i>動物園
                             </span>
                             <span id="detail-zoo-score" class="font-black text-lg text-emerald-700">--%</span>
                         </div>
@@ -344,10 +348,11 @@
                         </p>
                     </div>
 
+                    <!-- 道の駅 -->
                     <div class="p-4 rounded-2xl border border-orange-200/80 bg-orange-50/50 flex flex-col justify-between">
                         <div class="flex justify-between items-center">
                             <span class="font-extrabold text-slate-800 text-sm flex items-center">
-                                <i class="fa-solid fa-store text-orange-600 mr-2"></i>道の駅 西山公園
+                                <i class="fa-solid fa-store text-orange-600 mr-2"></i>道の駅
                             </span>
                             <span id="detail-station-score" class="font-black text-lg text-orange-700">--%</span>
                         </div>
