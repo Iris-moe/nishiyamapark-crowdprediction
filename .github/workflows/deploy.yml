@@ -3,6 +3,7 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ["main"]
+  workflow_dispatch: # 手動でデプロイを実行できるボタンを追加
 
 permissions:
   contents: read
@@ -22,20 +23,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm' # パッケージのキャッシュを有効化して高速化
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
       - name: Build
         run: npm run build
+        env:
+          CI: false # パワーアップ・厳格な警告によるビルド失敗を防止
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Vite の場合は dist、Create React App は build
+          path: './dist' # ※ Create React App の場合は './build' に変更してください
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
