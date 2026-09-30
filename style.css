@@ -1,0 +1,102 @@
+/* Custom Cursor: Glasses (眼鏡カーソル) */
+* {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='6' cy='12' r='4'/><circle cx='18' cy='12' r='4'/><path d='M10 12h4'/><path d='M2 12h0.5'/><path d='M21.5 12h0.5'/></svg>") 14 14, auto !important;
+}
+
+/* Hover Cursor: Glasses (ホバー時に緑色に変化＆少し拡大) */
+a, button, [role="button"], .calendar-cell, input, select {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='6' cy='12' r='4'/><circle cx='18' cy='12' r='4'/><path d='M10 12h4'/><path d='M2 12h0.5'/><path d='M21.5 12h0.5'/></svg>") 16 16, pointer !important;
+}
+
+/* Design & Layout Enhancements */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
+}
+
+/* Custom Active Tabs */
+.tab-active-zoo {
+    color: #15803d;
+    border-bottom: 3px solid #16a34a;
+    background: linear-gradient(180deg, rgba(240, 253, 244, 0) 0%, rgba(240, 253, 244, 0.9) 100%);
+}
+.tab-active-station {
+    color: #c2410c;
+    border-bottom: 3px solid #ea580c;
+    background: linear-gradient(180deg, rgba(255, 247, 237, 0) 0%, rgba(255, 247, 237, 0.9) 100%);
+}
+.tab-active-calendar {
+    color: #4338ca;
+    border-bottom: 3px solid #4f46e5;
+    background: linear-gradient(180deg, rgba(238, 242, 255, 0) 0%, rgba(238, 242, 255, 0.9) 100%);
+}
+
+.calendar-cell {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.calendar-cell:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* ==============================================
+   とことこ歩くアニメーション (Walking Animation)
+   ============================================== */
+
+/* 全体の横移動（テキストは反転させず、位置移動のみ） */
+#walking-character-container {
+    animation: walkLoop 22s linear infinite alternate;
+    will-change: transform;
+}
+
+/* 画像（レッサーパンダ）のみ向きを移動方向に合わせて反転 */
+.character-avatar img {
+    animation: pandaTurn 22s linear infinite alternate, tokotokoBounce 0.38s ease-in-out infinite alternate;
+}
+
+/* 全体の移動キーフレーム（向きの反転は含めない） */
+@keyframes walkLoop {
+    0% {
+        transform: translateX(-10%);
+    }
+    100% {
+        transform: translateX(calc(100vw - 230px));
+    }
+}
+
+/* 画像のみを折り返し地点で反転させるキーフレーム */
+@keyframes pandaTurn {
+    0%, 48.5% {
+        transform: scaleX(1);
+    }
+    50%, 98.5% {
+        transform: scaleX(-1);
+    }
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+/* ひょこひょこ動く上下バウンス */
+@keyframes tokotokoBounce {
+    0% {
+        transform: translateY(0px) rotate(-4deg);
+    }
+    100% {
+        transform: translateY(-4px) rotate(4deg);
+    }
+}

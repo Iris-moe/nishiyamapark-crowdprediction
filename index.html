@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西山動物園 & 道の駅 西山公園 AI混雑予測ナビ</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zoo: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                        },
+                        station: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Zen Maru Gothic"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased relative overflow-x-hidden">
+
+    <header class="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+                    <i class="fa-solid fa-glasses text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg text-slate-900 leading-tight">
+                        西山動物園 & 道の駅 AI混雑予測ナビ
+                    </h1>
+                    <p class="text-[11px] font-semibold text-slate-400">福井県鯖江市・OpenWeatherリアルタイムデータ連動</p>
+                </div>
+            </div>
+
+            <!-- 30-Second Polling Timer Badge -->
+            <div class="flex items-center space-x-2 bg-slate-100/80 border border-slate-200/80 px-3 py-1.5 rounded-full shadow-inner">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span id="ping-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs font-bold text-slate-600">
+                    <span class="hidden sm:inline">自動更新 </span>(<span id="timer-count" class="font-extrabold text-emerald-600">30</span>s)
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-16 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex justify-around sm:justify-start space-x-1 sm:space-x-4 text-sm font-bold overflow-x-auto">
+            <button onclick="switchTab('zoo')" id="tab-zoo" class="py-3.5 px-5 flex items-center space-x-2 text-emerald-800 tab-active-zoo transition shrink-0 rounded-t-2xl">
+                <i class="fa-solid fa-paw text-lg"></i>
+                <span>西山動物園</span>
+            </button>
+            <button onclick="switchTab('station')" id="tab-station" class="py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl">
+                <i class="fa-solid fa-store text-lg"></i>
+                <span>道の駅 西山公園</span>
+            </button>
+            <button onclick="switchTab('calendar')" id="tab-calendar" class="py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span>カレンダー混雑予測</span>
+            </button>
+        </div>
+    </div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-20">
+
+        <!-- Weather Status Card Header -->
+        <section class="glass-card rounded-3xl p-5 shadow-xs border border-white/60">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                <div class="md:col-span-1 border-b md:border-b-0 md:border-r border-slate-200/80 pb-3 md:pb-0 md:pr-4">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">鯖江市・西山エリア 現在の気象</span>
+                    <div class="flex items-center justify-between mt-1">
+                        <div>
+                            <div id="weather-temp" class="text-3xl font-black text-slate-900">--°C</div>
+                            <div id="weather-desc" class="text-xs font-bold text-slate-500">データ取得中...</div>
+                        </div>
+                        <div id="weather-icon" class="text-3xl text-amber-500">
+                            <i class="fa-solid fa-circle-notch animate-spin text-slate-300"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 md:col-span-2 gap-2 text-center text-xs">
+                    <div class="bg-white/60 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200/50 shadow-2xs">
+                        <div class="text-slate-400 font-medium"><i class="fa-solid fa-temperature-half text-amber-500 mr-1"></i>体感気温</div>
+                        <div id="weather-feels" class="font-black text-slate-800 text-sm mt-0.5">--°C</div>
+                    </div>
+                    <div class="bg-white/60 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200/50 shadow-2xs">
+                        <div class="text-slate-400 font-medium"><i class="fa-solid fa-droplet text-blue-500 mr-1"></i>湿度</div>
+                        <div id="weather-humidity" class="font-black text-slate-800 text-sm mt-0.5">--%</div>
+                    </div>
+                    <div class="bg-white/60 backdrop-blur-xs p-2.5 rounded-2xl border border-slate-200/50 shadow-2xs">
+                        <div class="text-slate-400 font-medium"><i class="fa-solid fa-wind text-teal-500 mr-1"></i>風速</div>
+                        <div id="weather-wind" class="font-black text-slate-800 text-sm mt-0.5">-- m/s</div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-1 bg-emerald-50/80 border border-emerald-200/80 p-3 rounded-2xl text-center shadow-2xs">
+                    <span class="text-[10px] font-extrabold text-emerald-800 uppercase block">気象AI分析判定</span>
+                    <span id="weather-impact-badge" class="text-xs font-bold text-emerald-950 mt-0.5 block">快適な見学・散策日和</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Zoo Section -->
+        <section id="view-zoo" class="space-y-6">
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-xs border border-emerald-200/60 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 text-emerald-100/50 opacity-40 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-hippo"></i>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-emerald-100/80 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200/60">入園料 無料</span>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>開園: 9:00 〜 16:30 (月曜休園)</span>
+                        </div>
+                        <h2 class="text-2xl font-black text-slate-900 mt-2 flex items-center">
+                            <i class="fa-solid fa-paw text-emerald-600 mr-2.5"></i>西山動物園 リアルタイム混雑状況
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">レッサーパンダ・ボリビアリスザル展示施設 / 人流オープンデータ解析</p>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur border border-emerald-200/80 p-4 rounded-2xl text-right min-w-[210px] shadow-sm">
+                        <span class="text-xs text-emerald-800 font-bold block">現在の動物園混雑率</span>
+                        <div class="text-4xl font-black text-emerald-600 mt-0.5" id="zoo-score">--%</div>
+                        <span id="zoo-badge" class="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">計算中</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden mt-5 shadow-inner">
+                    <div id="zoo-bar" class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-3.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+
+                <div class="mt-4 pt-3.5 border-t border-slate-100/80 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-bullseye text-emerald-600"></i>
+                        <span>本日の混雑ピーク: <strong>13:00 〜 15:00</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-clock text-emerald-600"></i>
+                        <span>平均見学時間: <strong>40分 〜 60分</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                        <span>混雑回避のコツ: <strong>午前10時台の来園がおすすめ</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zoo Detailed Spot Cards -->
+            <div>
+                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center">
+                    <i class="fa-solid fa-layer-group text-emerald-600 mr-2"></i>動物園内 スポット別予測状況
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="zoo-spots-container"></div>
+            </div>
+
+            <!-- Zoo Chart -->
+            <div class="glass-card rounded-3xl p-5 shadow-xs border border-slate-200/80">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">西山動物園 本日の時間帯別混雑推移</h3>
+                        <p class="text-xs text-slate-400">天候・気温および過去の月別来場実績に基づくAI混雑波形</p>
+                    </div>
+                    <span class="text-xs bg-emerald-100/80 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-200/60">リアルタイム算出</span>
+                </div>
+                <div class="h-60 relative">
+                    <canvas id="zooHourlyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Station Section -->
+        <section id="view-station" class="space-y-6 hidden">
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-xs border border-orange-200/60 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 text-orange-100/50 opacity-40 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-orange-100/80 text-orange-800 text-xs font-bold px-3 py-1 rounded-full border border-orange-200/60">特産品・スイーツ・駐車場</span>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>営業: 9:00 〜 18:00</span>
+                        </div>
+                        <h2 class="text-2xl font-black text-slate-900 mt-2 flex items-center">
+                            <i class="fa-solid fa-utensils text-orange-600 mr-2.5"></i>道の駅 西山公園 リアルタイム混雑状況
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">物産館・つつじソフト・サバエドッグ・第1/第2駐車場人流連動</p>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur border border-orange-200/80 p-4 rounded-2xl text-right min-w-[210px] shadow-sm">
+                        <span class="text-xs text-orange-800 font-bold block">現在の道の駅混雑率</span>
+                        <div class="text-4xl font-black text-orange-600 mt-0.5" id="station-score">--%</div>
+                        <span id="station-badge" class="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">計算中</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden mt-5 shadow-inner">
+                    <div id="station-bar" class="bg-gradient-to-r from-orange-400 to-orange-600 h-3.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+
+                <div class="mt-4 pt-3.5 border-t border-slate-100/80 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-utensils text-orange-600"></i>
+                        <span>ランチタイム混雑: <strong>11:30 〜 13:30</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-square-parking text-orange-600"></i>
+                        <span>駐車場注意: <strong>12時前後は満車率が高まります</strong></span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-slate-600 font-medium">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                        <span>お買い物のコツ: <strong>15時以降の利用がスムーズです</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center">
+                    <i class="fa-solid fa-layer-group text-orange-600 mr-2"></i>道の駅内 スポット別予測状況
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="station-spots-container"></div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-5 shadow-xs border border-slate-200/80">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">道の駅 西山公園 本日の時間帯別混雑推移</h3>
+                        <p class="text-xs text-slate-400">ランチ・ドライブ休憩・お土産購入需要の時間帯別傾向</p>
+                    </div>
+                    <span class="text-xs bg-orange-100/80 text-orange-800 font-bold px-3 py-1 rounded-full border border-orange-200/60">リアルタイム算出</span>
+                </div>
+                <div class="h-60 relative">
+                    <canvas id="stationHourlyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section id="view-calendar" class="space-y-6 hidden">
+            <div class="glass-card p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-calendar-days text-indigo-600 mr-2.5"></i>月間 混雑予測カレンダー
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">曜日・祝日・イベント・過去の施設別実績データからAIが算出する1ヶ月の混雑度予測</p>
+                </div>
+
+                <div class="flex items-center space-x-3 bg-white/80 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                    <button onclick="changeCalendarMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span id="calendar-month-label" class="text-base font-black text-slate-800 min-w-[120px] text-center">2026年 9月</span>
+                    <button onclick="changeCalendarMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition shadow-2xs">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
+                <span class="font-extrabold text-slate-500">混雑度凡例:</span>
+                <div class="flex flex-wrap items-center gap-3 font-semibold">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 快適 (&lt;45%)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> やや混雑 (45-69%)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> 混雑 (70-84%)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span> イベント大混雑 (85%+)</span>
+                    <span class="flex items-center gap-1.5 text-slate-400 border-l border-slate-200/80 pl-3"><i class="fa-solid fa-ban text-rose-400"></i> 月曜休園(動物園)</span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden p-2 sm:p-4">
+                <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center font-extrabold text-xs sm:text-sm text-slate-400">
+                    <div class="py-2 text-rose-500">日</div>
+                    <div class="py-2">月</div>
+                    <div class="py-2">火</div>
+                    <div class="py-2">水</div>
+                    <div class="py-2">木</div>
+                    <div class="py-2">金</div>
+                    <div class="py-2 text-blue-500">土</div>
+                </div>
+                <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+            </div>
+
+            <div id="calendar-day-detail" class="glass-card p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 pb-3 gap-2">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">選択した日付の予測詳細</span>
+                        <h3 id="detail-date-title" class="text-lg font-black text-slate-800">2026年9月26日(土)</h3>
+                    </div>
+                    <div id="detail-event-tag" class="hidden text-xs font-bold px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-800 self-start sm:self-center">
+                        <i class="fa-solid fa-star mr-1"></i>つつじまつり
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/50 flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-slate-800 text-sm flex items-center">
+                                <i class="fa-solid fa-paw text-emerald-600 mr-2"></i>西山動物園
+                            </span>
+                            <span id="detail-zoo-score" class="font-black text-lg text-emerald-700">--%</span>
+                        </div>
+                        <p id="detail-zoo-advice" class="text-xs text-slate-600 mt-2.5 leading-relaxed font-medium">
+                            カレンダーの日付を選択すると予測詳細が表示されます。
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl border border-orange-200/80 bg-orange-50/50 flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-slate-800 text-sm flex items-center">
+                                <i class="fa-solid fa-store text-orange-600 mr-2"></i>道の駅 西山公園
+                            </span>
+                            <span id="detail-station-score" class="font-black text-lg text-orange-700">--%</span>
+                        </div>
+                        <p id="detail-station-advice" class="text-xs text-slate-600 mt-2.5 leading-relaxed font-medium">
+                            カレンダーの日付を選択すると予測詳細が表示されます。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- とことこ歩くレッサーパンダ（画面下部固定） -->
+    <div id="walking-character-container" class="fixed bottom-3 left-0 z-50 pointer-events-none select-none">
+        <div id="walking-character" class="flex items-center gap-2 bg-white/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-200/80 shadow-lg shadow-emerald-950/5">
+            <span class="character-avatar inline-flex items-center justify-center">
+                <img src="ressapanda.png" alt="レッサーパンダ" class="w-8 h-8 object-contain">
+            </span>
+            <span class="character-text text-xs sm:text-sm font-bold text-slate-800">西山公園を散策中...</span>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="script.js"></script>
+</body>
+</html>
