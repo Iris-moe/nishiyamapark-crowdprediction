@@ -30,20 +30,24 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
+        working-directory: ./frontend # ← サブフォルダ名を指定
         run: npm install --legacy-peer-deps
 
       - name: Build
+        working-directory: ./frontend # ← サブフォルダ名を指定
         run: npm run build
         env:
-          CI: false # パワーアップ・厳格な警告によるビルド失敗を防止
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+          CI: false
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # ※ Create React App の場合は './build' に変更してください
+          path: './frontend/dist' # ← 生成物パスもサブフォルダ配下に指定
+
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
 
       - name: Deploy to GitHub Pages
         id: deployment
