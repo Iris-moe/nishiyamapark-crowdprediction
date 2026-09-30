@@ -3,9 +3,9 @@
     cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='6' cy='12' r='4'/><circle cx='18' cy='12' r='4'/><path d='M10 12h4'/><path d='M2 12h0.5'/><path d='M21.5 12h0.5'/></svg>") 14 14, auto !important;
 }
 
-/* Hover Cursor: Glasses (ホバー時に緑色に変化＆少し拡大) */
+/* Hover Cursor: Glasses (ホバー時に赤色に変化＆拡大) */
 a, button, [role="button"], .calendar-cell, input, select {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='6' cy='12' r='4'/><circle cx='18' cy='12' r='4'/><path d='M10 12h4'/><path d='M2 12h0.5'/><path d='M21.5 12h0.5'/></svg>") 16 16, pointer !important;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='6' cy='12' r='4'/><circle cx='18' cy='12' r='4'/><path d='M10 12h4'/><path d='M2 12h0.5'/><path d='M21.5 12h0.5'/></svg>") 16 16, pointer !important;
 }
 
 /* Design & Layout Enhancements */
@@ -57,7 +57,7 @@ body {
    とことこ歩くアニメーション (Walking Animation)
    ============================================== */
 
-/* 全体の横移動（テキストは反転させず、位置移動のみ） */
+/* 全体の横移動 */
 #walking-character-container {
     animation: walkLoop 22s linear infinite alternate;
     will-change: transform;
@@ -68,7 +68,7 @@ body {
     animation: pandaTurn 22s linear infinite alternate, tokotokoBounce 0.38s ease-in-out infinite alternate;
 }
 
-/* 全体の移動キーフレーム（向きの反転は含めない） */
+/* 全体の移動キーフレーム */
 @keyframes walkLoop {
     0% {
         transform: translateX(-10%);
