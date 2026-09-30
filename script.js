@@ -36,22 +36,25 @@ const stationSpots = [
 
 function switchTab(tabId) {
     activeTab = tabId;
+    
     ['zoo', 'station', 'calendar'].forEach(id => {
         const viewEl = document.getElementById(`view-${id}`);
         const tabEl = document.getElementById(`tab-${id}`);
         
+        if (!viewEl || !tabEl) return;
+
         if (id === tabId) {
             viewEl.classList.remove('hidden');
             if (id === 'zoo') {
-                tabEl.className = "py-3.5 px-5 flex items-center space-x-2 tab-active-zoo transition shrink-0 rounded-t-xl font-bold";
+                tabEl.className = "relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-emerald-800 tab-active-zoo transition shrink-0 rounded-t-2xl font-bold";
             } else if (id === 'station') {
-                tabEl.className = "py-3.5 px-5 flex items-center space-x-2 tab-active-station transition shrink-0 rounded-t-xl font-bold";
+                tabEl.className = "relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-orange-800 tab-active-station transition shrink-0 rounded-t-2xl font-bold";
             } else {
-                tabEl.className = "py-3.5 px-5 flex items-center space-x-2 tab-active-calendar transition shrink-0 rounded-t-xl font-bold";
+                tabEl.className = "relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-indigo-800 tab-active-calendar transition shrink-0 rounded-t-2xl font-bold";
             }
         } else {
             viewEl.classList.add('hidden');
-            tabEl.className = "py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-xl font-bold";
+            tabEl.className = "relative z-30 cursor-pointer py-3.5 px-5 flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition shrink-0 rounded-t-2xl font-bold";
         }
     });
 
@@ -141,11 +144,11 @@ function renderCalendar() {
 
                 <div class="space-y-1 text-[10px] sm:text-xs">
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-400 font-medium">🐼 園</span>
+                        <span class="text-slate-500 font-bold">動物園</span>
                         ${getBadge(zooScore, true)}
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-400 font-medium">🛍️ 駅</span>
+                        <span class="text-slate-500 font-bold">道の駅</span>
                         ${getBadge(stationScore, false)}
                     </div>
                 </div>
